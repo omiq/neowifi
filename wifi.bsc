@@ -1,0 +1,30 @@
+proc serialread( )
+
+    while uhasdata( ) =0:wend
+
+    while uhasdata( ) = -1
+        ureceive buffer+buflen,1:buflen=buflen+1
+        wait 100
+    wend
+
+    for c=0 to buflen
+    print chr$(peek(buffer+c) ) ;
+    next
+    buflen=0:buffer=0
+
+endproc
+
+proc serialsend(st$ )
+    usend st$ +chr$(13) +chr$(10)
+    wait 500
+endproc
+
+uconfig 9600
+buffer=alloc(500) :buflen=0
+call serialsend("AT")
+call serialread( )
+call serialsend("ATE0")
+call serialread( )
+call serialsend("AT+CWLAP")
+call serialread( )
+print""
