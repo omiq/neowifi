@@ -29,7 +29,6 @@ proc serialread( )
         print chr$(peek(buffer+c) ) ;
     next
     buflen=0
-    buffer=0
     print""
 endproc
 
