@@ -1,17 +1,30 @@
 uconfig 115200
 buffer=alloc(500) :buflen=0
+
 print "Checking Wifi Module"
 call serialsend( "AT" )
 call serialread( )
+
 print "Set no echo"
 call serialsend( "ATE0" )
 call serialread( )
+
+print "Set DNS server to Google"
+call serialsend( "AT+CIPDNS_CUR=1,"+chr$(34)+"8.8.8.8"+chr$(34) )
+call serialread( )
+
+print "Ping Google"
+call serialsend( "AT+PING="+chr$(34)+"www.google.com"+chr$(34) )
+call serialread( )
+
 print "Check for Wifi hotspots"
 call serialsend( "AT+CWLAP" )
 call serialread( )
+
 print "Requesting IP Address"
 call serialsend( "AT+CIFSR" )
 call serialread( )
+
 print ""
 print "Done"
 print ""
