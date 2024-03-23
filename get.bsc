@@ -1,0 +1,40 @@
+uconfig 115200
+buffer=alloc(500) :buflen=0
+call wget( "hsiq.com", "/" )
+print ""
+print "DONE"
+print ""
+end
+
+
+proc serialread( )
+    while uhasdata( ) = 0
+        wait 1
+    wend
+    while uhasdata( ) = -1
+        ureceive buffer+buflen,1
+        buflen=buflen+1
+    wend
+    for c = 0 to buflen
+        ch = peek(buffer+c) 
+        print chr$(ch); 
+    next
+    buflen = 0
+endproc
+
+proc serialsend(st$ )
+    usend st$ +chr$(13) +chr$(10)
+    wait 50
+endproc
+
+proc wget(host$,path$)
+    
+    call serialsend( "AT+CIPSTART="+chr$(34)+"TCP"+chr$(34)+","+chr$(34)+host$+chr$(34)+",80" )
+    call serialread( )
+    s$="GET " + path$ + " HTTP/1.1" + chr$(13) + chr$(10) + "Host: " + host$
+    call serialsend( "AT+CIPSEND=" + str$(len(s$)+4))
+    call serialread( )
+    call serialsend( s$ +chr$(13) +chr$(10)+chr$(13) +chr$(10))
+    call serialread( )
+
+endproc
