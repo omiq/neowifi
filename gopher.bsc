@@ -1,0 +1,57 @@
+uconfig 115200
+buffer=alloc(500) :buflen=0
+
+cls
+call getpage("")
+call waitkey()
+
+cls
+call getpage("/about")
+call waitkey()
+
+
+
+end
+
+proc waitkey()
+
+    k$=""
+    while k$=""
+    k$=inkey$()
+    wend
+
+
+endproc
+
+proc serialread( )
+    while uhasdata( ) = 0
+        wait 1
+    wend
+    while uhasdata( ) = -1
+        ureceive buffer+buflen,1
+        buflen=buflen+1
+    wend
+    for c = 0 to buflen
+        ch = peek(buffer+c) 
+        print chr$(ch); 
+    next
+    buflen = 0
+endproc
+
+proc serialsend(st$ )
+    usend st$ +chr$(13) +chr$(10)
+    wait 50
+endproc
+
+
+proc getpage(path$)
+
+    s$=path$
+    call serialsend("AT+CIPSTART="+chr$(34)+"TCP"+chr$(34)+","+chr$(34)+"hngopher.com"+chr$(34)+",70,1000")
+    call serialread( )
+    call serialsend( "AT+CIPSEND=" + str$(len(s$)+4))
+    call serialread( )
+    call serialsend( s$ +chr$(13) +chr$(10)+chr$(13) +chr$(10))
+    call serialread( )
+
+endproc
