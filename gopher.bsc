@@ -30,7 +30,11 @@ proc serialread( )
     wend
     for c = 0 to buflen
         ch = peek(buffer+c) 
-        if ch <> 9 then print chr$(ch); 
+        if ch <> 9 then 
+            print chr$(ch);
+        else
+            print chr$(32);
+        endif 
     next
     buflen = 0
 endproc
