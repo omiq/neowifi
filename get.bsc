@@ -1,6 +1,10 @@
 uconfig 115200
 buffer=alloc(500) :buflen=0
-call wget( "hsiq.com", "/" )
+protocol$=""
+host$=""
+path$=""
+
+call wget( "http:/hsiq.com/" )
 print ""
 print "DONE"
 print ""
@@ -27,8 +31,30 @@ proc serialsend(st$ )
     wait 50
 endproc
 
-proc wget(host$,path$)
-    
+
+proc spliturl(url$)
+
+    protocol$=""
+    host$=""
+    path$=""
+
+    protocolend = instr(url$,"/")+1
+    protocol$=mid$(url$,1,protocolend)
+    url$=mid$(url$,protocolend+1)
+    pathstart=instr(url$,"/")
+    host$=mid$(url$,1,pathstart-1)
+    path$=mid$(url$,pathstart)
+
+endproc
+
+proc wget(url$)
+
+    call spliturl(url$)
+    print "protocol: " + protocol$
+    print "host: " + host$
+    print "path: " + path$
+
+
     call serialsend( "AT+CIPSTART="+chr$(34)+"TCP"+chr$(34)+","+chr$(34)+host$+chr$(34)+",80" )
     call serialread( )
     s$="GET " + path$ + " HTTP/1.1" + chr$(13) + chr$(10) + "Host: " + host$

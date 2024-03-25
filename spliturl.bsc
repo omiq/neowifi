@@ -1,0 +1,26 @@
+input url$
+call spliturl(url$)
+end
+
+
+proc spliturl(url$)
+
+    protocol$=""
+    host$=""
+    path$=""
+    
+    protocolend = instr(url$,"/")+1
+
+    protocol$=mid$(url$,1,protocolend)
+    print "protocol: " + protocol$
+
+    url$=mid$(url$,protocolend+1)
+    
+    pathstart=instr(url$,"/")
+    host$=mid$(url$,1,pathstart-1)
+    print "host: " + host$
+
+    path$=mid$(url$,pathstart)
+    print "path: " + path$
+
+endproc
