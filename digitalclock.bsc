@@ -1,0 +1,220 @@
+uconfig 115200
+buffer=alloc(500) :buflen=0
+
+Dim digits$(11,5)
+
+digits$(0,0) = "OOO"
+digits$(0,1) = "O.O"
+digits$(0,2) = "O.O"
+digits$(0,3) = "O.O"
+digits$(0,4) = "OOO"
+
+digits$(1,0) = "OO."
+digits$(1,1) = ".O."
+digits$(1,2) = ".O."
+digits$(1,3) = ".O."
+digits$(1,4) = "OOO"
+
+digits$(2,0) = "OOO"
+digits$(2,1) = "..O"
+digits$(2,2) = "OOO"
+digits$(2,3) = "O.."
+digits$(2,4) = "OOO"
+
+digits$(3,0) = "OOO"
+digits$(3,1) = "..O"
+digits$(3,2) = "OOO"
+digits$(3,3) = "..O"
+digits$(3,4) = "OOO"
+
+digits$(4,0) = "O.O"
+digits$(4,1) = "O.O"
+digits$(4,2) = "OOO"
+digits$(4,3) = "..O"
+digits$(4,4) = "..O"
+
+digits$(5,0) = "OOO"
+digits$(5,1) = "O.."
+digits$(5,2) = "OOO"
+digits$(5,3) = "..O"
+digits$(5,4) = "OOO"
+
+digits$(6,0) = "OOO"
+digits$(6,1) = "O.."
+digits$(6,2) = "OOO"
+digits$(6,3) = "O.O"
+digits$(6,4) = "OOO"
+
+digits$(7,0) = "OOO"
+digits$(7,1) = "..O"
+digits$(7,2) = "..O"
+digits$(7,3) = "..O"
+digits$(7,4) = "..O"
+
+digits$(8,0) = "OOO"
+digits$(8,1) = "O.O"
+digits$(8,2) = "OOO"
+digits$(8,3) = "O.O"
+digits$(8,4) = "OOO"
+
+digits$(9,0) = "OOO"
+digits$(9,1) = "O.O"
+digits$(9,2) = "OOO"
+digits$(9,3) = "..O"
+digits$(9,4) = "OOO"
+
+digits$(10,0) = "..."
+digits$(10,1) = ".O."
+digits$(10,2) = "..."
+digits$(10,3) = ".O."
+digits$(10,4) = "..."
+
+
+day$=""
+mon$=""
+daynum$=""
+time$=""
+year$=""
+hours$=""
+mins$=""
+secs$=""
+
+cls
+
+while 1
+    call gettime()
+    call showtime()
+wend
+
+
+end
+
+proc waitkey()
+
+    k$=""
+    while k$=""
+    k$=inkey$()
+    wend
+
+endproc
+
+proc serialread( )
+    while uhasdata( ) = 0
+        wait 1
+    wend
+    while uhasdata( ) = -1
+        ureceive buffer+buflen,1
+        buflen=buflen+1
+    wend
+
+endproc
+
+proc serialsend(st$ )
+    usend st$ +chr$(13) +chr$(10)
+    wait 50
+endproc
+
+
+proc gettime()
+
+    call serialsend("AT+CIPSNTPCFG=1,0,"+chr$(34)+"0.pool.ntp.org"+chr$(34))
+    call serialread( )
+    call serialsend( "AT+CIPSNTPTIME?")
+    call serialread( )
+
+    response$ = ""
+    for c = 0 to buflen
+        ch = peek(buffer+c) 
+        response$ = response$ + chr$(ch)
+    next
+
+    firstcolon = instr(response$,":")+1
+    datestamp$ = mid$(response$,firstcolon)
+    cr = instr(datestamp$,chr$(13))
+    
+    dateplustime$=mid$(datestamp$,1,cr)
+    sp = instr(dateplustime$,chr$(32))
+    day$=mid$(dateplustime$,1,sp-1)
+    remainder$=mid$(dateplustime$,sp+1)
+
+    sp = instr(remainder$,chr$(32))
+    mon$=mid$(remainder$,1,sp-1)
+    remainder$=mid$(remainder$,sp+1)
+
+    sp = instr(remainder$,chr$(32))
+    daynum$=mid$(remainder$,1,sp-1)
+    remainder$=mid$(remainder$,sp+1)
+
+    sp = instr(remainder$,chr$(32))
+    time$=mid$(remainder$,1,sp-1)
+    remainder$=mid$(remainder$,sp)
+    sp = instr(remainder$,chr$(32))
+    year$=mid$(remainder$,2,len(remainder$)-2)
+
+    hours$=mid$(time$,1,2)
+    mins$=mid$(time$,4,2)
+    secs$=mid$(time$,7,2)
+
+    buflen = 0
+
+endproc
+
+proc prdigit(digit, x, y)
+
+    cursor x,y
+    line$ = digits$(digit,0)
+    print line$;
+
+    cursor x,y+1
+    line$ = digits$(digit,1)
+    print line$;
+
+    cursor x,y+2
+    line$ = digits$(digit,2)
+    print line$;
+
+    cursor x,y+3
+    line$ = digits$(digit,3)
+    print line$;
+
+    cursor x,y+4
+    line$ = digits$(digit,4)
+    print line$;
+
+endproc
+
+proc showtime()
+
+    y=10
+    x=10
+    digit = val(mid$(hours$,1,1))
+    call prdigit(digit,x,y)
+
+    x=x+4
+    digit = val(mid$(hours$,2,1))
+    call prdigit(digit,x,y)
+
+    x=x+4
+    call prdigit(10,x,y)
+
+    x=x+4
+    digit = val(mid$(mins$,1,1))
+    call prdigit(digit,x,y)
+
+    x=x+4
+    digit = val(mid$(mins$,2,1))
+    call prdigit(digit,x,y)
+
+    x=x+4
+    call prdigit(10,x,y)
+
+    x=x+4
+    digit = val(mid$(secs$,1,1))
+    call prdigit(digit,x,y)
+
+    x=x+4
+    digit = val(mid$(secs$,2,1))
+    call prdigit(digit,x,y)
+
+
+endproc
