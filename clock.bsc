@@ -5,7 +5,7 @@ cls
 while 1
     cursor 0,0
     call gettime()
-    wait 10
+    wait 5
 wend
 
 
