@@ -9,8 +9,6 @@ cls
 call getpage("/about")
 call waitkey()
 
-
-
 end
 
 proc waitkey()
