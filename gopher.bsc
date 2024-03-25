@@ -18,7 +18,6 @@ proc waitkey()
     k$=inkey$()
     wend
 
-
 endproc
 
 proc serialread( )
