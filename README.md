@@ -3,5 +3,4 @@
 * wifitest = ensure you have everything working
 * interactive = interactive AT command session
 * get = example of using the MOD WIFI to get a web page and output the response
-
-* 
+* gopher = gopher example (which looks like ass but whatevs)
