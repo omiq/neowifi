@@ -1,0 +1,81 @@
+uconfig 115200
+buffer=alloc(500) :buflen=0
+cls
+
+while 1
+    cursor 0,0
+    call gettime()
+    wait 10
+wend
+
+
+end
+
+proc waitkey()
+
+    k$=""
+    while k$=""
+    k$=inkey$()
+    wend
+
+endproc
+
+proc serialread( )
+    while uhasdata( ) = 0
+        wait 1
+    wend
+    while uhasdata( ) = -1
+        ureceive buffer+buflen,1
+        buflen=buflen+1
+    wend
+
+endproc
+
+proc serialsend(st$ )
+    usend st$ +chr$(13) +chr$(10)
+    wait 50
+endproc
+
+
+proc gettime()
+
+    call serialsend("AT+CIPSNTPCFG=1,0,"+chr$(34)+"0.pool.ntp.org"+chr$(34))
+    call serialread( )
+    call serialsend( "AT+CIPSNTPTIME?")
+    call serialread( )
+
+    response$ = ""
+    for c = 0 to buflen
+        ch = peek(buffer+c) 
+        response$ = response$ + chr$(ch)
+    next
+
+    firstcolon = instr(response$,":")+1
+    datestamp$ = mid$(response$,firstcolon)
+    cr = instr(datestamp$,chr$(13))
+    
+    dateplustime$=mid$(datestamp$,1,cr)
+    sp = instr(dateplustime$,chr$(32))
+    day$=mid$(dateplustime$,1,sp-1)
+    remainder$=mid$(dateplustime$,sp+1)
+
+    sp = instr(remainder$,chr$(32))
+    mon$=mid$(remainder$,1,sp-1)
+    remainder$=mid$(remainder$,sp+1)
+
+    sp = instr(remainder$,chr$(32))
+    daynum$=mid$(remainder$,1,sp-1)
+    remainder$=mid$(remainder$,sp+1)
+
+    sp = instr(remainder$,chr$(32))
+    time$=mid$(remainder$,1,sp-1)
+    remainder$=mid$(remainder$,sp)
+    sp = instr(remainder$,chr$(32))
+    year$=mid$(remainder$,2,len(remainder$)-2)
+
+    print day$ + " " + daynum$  + " " + mon$  + ", " + year$
+    print time$
+
+    buflen = 0
+
+endproc
